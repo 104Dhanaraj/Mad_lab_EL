@@ -1,6 +1,6 @@
 {
-  "name":"A simple website application",
-  "description":"webApp",
+  "name":"Weather PWA",
+  "description":"Berlin weather Application",
   "id":"./",
   "start_url":"./",
   "display":"standalone",
