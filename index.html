@@ -3,31 +3,145 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>PWA</title>
+  <title>Weather PWA</title>
   <link rel="icon" href="/favicon.ico">
   <link rel="stylesheet" href="css/styles.css">
   <link rel="manifest" href="manifest.json">
+
+  <style>
+    /* General Styles */
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to right, #74ebd5, #acb6e5);
+      color: #333;
+      text-align: center;
+    }
+
+    h1, h2 {
+      color: #222;
+    }
+
+    /* Header Styling */
+    header {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 20px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Install Button */
+    #install {
+      background: #ff6f61;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: 0.3s ease;
+    }
+
+    #install:hover {
+      background: #e85a50;
+      transform: scale(1.05);
+    }
+
+    /* Gallery */
+    #section2 img {
+      width: 80%;
+      max-width: 400px;
+      border-radius: 10px;
+      box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Weather Table */
+    table {
+      width: 80%;
+      max-width: 600px;
+      margin: 20px auto;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background: #f7b733;
+      color: white;
+      font-size: 18px;
+    }
+
+    tr:hover {
+      background: #f9f9f9;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      table {
+        width: 90%;
+      }
+      #install {
+        width: 90%;
+      }
+    }
+  </style>
 </head>
 <body>
+
   <header>
-    <h1>MAD-LAB-EL</h1>
-    <p>This is Progressive Web Application.</p>
-    <button id="install" hidden>install PWA</button>
+    <h1>Weather PWA</h1>
+    <p>Stay updated with real-time weather forecasts.</p>
+    <button id="install" hidden>Install Weather PWA</button>
   </header>
 
   <section id="section2">
     <h2>Gallery</h2>
     <center>
-      <img src="icons/screenshots5.jpg" alt="Screenshot"/>
+      <img src="icons/berlin.jpg" alt="Berlin Weather">
     </center>
   </section>
 
   <section>
     <h2>About</h2>
-    <p>This PWA demonstrates the use of a manifest, a service worker and PWA installation</p>
+    <p>This PWA provides real-time weather updates using Open-Meteo API.</p>
   </section>
-  <p id="Demo of Fetch"></p>
-  <p id="FakeAPIs"></p>
+
+  <section>
+    <h2>Weather Details</h2>
+    <table id="weather-table">
+      <tr>
+        <th>Attribute</th>
+        <th>Value</th>
+      </tr>
+      <tr>
+        <td>Latitude</td>
+        <td id="latitude">Loading...</td>
+      </tr>
+      <tr>
+        <td>Longitude</td>
+        <td id="longitude">Loading...</td>
+      </tr>
+      <tr>
+        <td>Time Zone</td>
+        <td id="timezone">Loading...</td>
+      </tr>
+      <tr>
+        <td>Time</td>
+        <td id="time">Loading...</td>
+      </tr>
+      <tr>
+        <td>Temperature (2m)</td>
+        <td id="temperature">Loading...</td>
+      </tr>
+    </table>
+  </section>
 
   <script>
     let installPro = null; 
@@ -40,67 +154,51 @@
     });
 
     installbtn.addEventListener("click", async () => {
-      console.log("install button is clicked:", installPro);
-      if (!installPro) {
-        return;
-      }
+      if (!installPro) return;
       const result = await installPro.prompt();
-      console.log("Install prompt was:", result.outcome);
       installPro = null;
       installbtn.setAttribute("hidden", "");
     });
 
-    
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js')
         .then(() => console.log('Service Worker Registered'))
         .catch(err => console.error('Service Worker registration failed:', err));
     }
 
-    // Fetch API
-    const apiURL="https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.41&minutely_15=temperature_2m"
-    const fakeAPI = document.getElementById('FakeAPIs');
+    // Fetch Weather API and update table
+    const apiURL = "https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.41&minutely_15=temperature_2m";
 
     fetch(apiURL)
       .then(response => {
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`Error: ${response.status}`);
         return response.json();
       })
       .then(data => {
-        const latestTemperature = data.minutely_15.temperature_2m.at(-1); 
-        const latestTime = data.minutely_15.time.at(-1); 
-        fakeAPI.innerHTML = `<h2>Weather Details</h2>
-          <p><strong>Latitude:</strong> ${data.latitude}</p>
-          <p><strong>Longitude:</strong> ${data.longitude}</p>
-          <p><strong>TimeZone:</strong> ${data.timezone}</p>
-          <p><strong>Time:</strong> ${latestTime}</p>
-          <p><strong>Temperature(2m):</strong> ${latestTemperature}</p>`;
+        const latestTemperature = data.minutely_15.temperature_2m.at(-1);
+        const latestTime = data.minutely_15.time.at(-1);
+        
+        document.getElementById("latitude").textContent = data.latitude;
+        document.getElementById("longitude").textContent = data.longitude;
+        document.getElementById("timezone").textContent = data.timezone;
+        document.getElementById("time").textContent = latestTime;
+        document.getElementById("temperature").textContent = latestTemperature + "°C";
       })
       .catch(error => {
         console.error('Error fetching weather data:', error);
       });
 
-   
+    // Promise-based Delayed Message
     const delayedMessage = new Promise((resolve, reject) => {
       setTimeout(() => {
-        const success = true;
-        if (success) {
-          resolve("Delayed task completed successfully!");
-        } else {
-          reject("Delayed task failed.");
-        }
+        resolve("Weather data loaded successfully!");
       }, 2000);
     });
 
     delayedMessage
-      .then(message => {
-        console.log(message);
-      })
-      .catch(error => {
-        console.error(error);
-      });
+      .then(message => console.log(message))
+      .catch(error => console.error(error));
+
   </script>
 </body>
 </html>

@@ -62,15 +62,15 @@
   ],
   "screenshots":[
       {
-          "src":"icons/Screenshot21.png",
-          "sizes":"1920x977",
+          "src":"icons/S1.png",
+          "sizes":"1049x847",
           "type":"image/png",
           "form_factor":"wide",
           "label":"screenshot_1"
       },
       {
-          "src":"icons/Screenshot22.png",
-          "sizes":"945x957",
+          "src":"icons/S2.png",
+          "sizes":"1920x967",
           "type":"image/png",
           "form_factor":"narrow",
           "label":"screenshot_2"
