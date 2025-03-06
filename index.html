@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PWA</title>
+  <link rel="icon" href="/favicon.ico">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+  <header>
+    <h1>MAD-LAB-EL</h1>
+    <p>This is Progressive Web Application.</p>
+    <button id="install" hidden>install PWA</button>
+  </header>
+
+  <section id="section2">
+    <h2>Gallery</h2>
+    <center>
+      <img src="icons/screenshots5.jpg" alt="Screenshot"/>
+    </center>
+  </section>
+
+  <section>
+    <h2>About</h2>
+    <p>This PWA demonstrates the use of a manifest, a service worker and PWA installation</p>
+  </section>
+  <p id="Demo of Fetch"></p>
+  <p id="FakeAPIs"></p>
+
+  <script>
+    let installPro = null; 
+    const installbtn = document.querySelector("#install");
+
+    window.addEventListener("beforeinstallprompt", (event) => {
+      event.preventDefault();
+      installPro = event;
+      installbtn.removeAttribute("hidden");
+    });
+
+    installbtn.addEventListener("click", async () => {
+      console.log("install button is clicked:", installPro);
+      if (!installPro) {
+        return;
+      }
+      const result = await installPro.prompt();
+      console.log("Install prompt was:", result.outcome);
+      installPro = null;
+      installbtn.setAttribute("hidden", "");
+    });
+
+    
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(() => console.log('Service Worker Registered'))
+        .catch(err => console.error('Service Worker registration failed:', err));
+    }
+
+    // Fetch API
+    const apiURL="https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.41&minutely_15=temperature_2m"
+    const fakeAPI = document.getElementById('FakeAPIs');
+
+    fetch(apiURL)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        const latestTemperature = data.minutely_15.temperature_2m.at(-1); 
+        const latestTime = data.minutely_15.time.at(-1); 
+        fakeAPI.innerHTML = `<h2>Weather Details</h2>
+          <p><strong>Latitude:</strong> ${data.latitude}</p>
+          <p><strong>Longitude:</strong> ${data.longitude}</p>
+          <p><strong>TimeZone:</strong> ${data.timezone}</p>
+          <p><strong>Time:</strong> ${latestTime}</p>
+          <p><strong>Temperature(2m):</strong> ${latestTemperature}</p>`;
+      })
+      .catch(error => {
+        console.error('Error fetching weather data:', error);
+      });
+
+   
+    const delayedMessage = new Promise((resolve, reject) => {
+      setTimeout(() => {
+        const success = true;
+        if (success) {
+          resolve("Delayed task completed successfully!");
+        } else {
+          reject("Delayed task failed.");
+        }
+      }, 2000);
+    });
+
+    delayedMessage
+      .then(message => {
+        console.log(message);
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  </script>
+</body>
+</html>
